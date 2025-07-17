@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}Hygiene360 - Home{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="display-4 fw-bold text-primary">
+            <i class="fas fa-shield-alt me-2"></i>Hygiene360
+        </h1>
+        <p class="lead text-muted">Endpoint Security Agent System</p>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow mb-5">
+                <div class="card-body p-5">
+                    <h2 class="card-title mb-4">Welcome to Hygiene360</h2>
+                    <p class="card-text">
+                        Hygiene360 is a lightweight, automated endpoint security agent system designed to assess 
+                        and quantify security posture in remote environments. It evaluates key security indicators, 
+                        provides dynamic scoring, and visualizes results through a centralized web dashboard.
+                    </p>
+                    
+                    <hr class="my-4">
+                    
+                    <h3 class="h5 mb-3">Key Features:</h3>
+                    <ul class="list-group list-group-flush mb-4">
+                        <li class="list-group-item"><i class="fas fa-check-circle text-success me-2"></i> OS patch status monitoring</li>
+                        <li class="list-group-item"><i class="fas fa-check-circle text-success me-2"></i> Antivirus status and activity tracking</li>
+                        <li class="list-group-item"><i class="fas fa-check-circle text-success me-2"></i> Firewall configuration assessment</li>
+                        <li class="list-group-item"><i class="fas fa-check-circle text-success me-2"></i> Software version checking</li>
+                        <li class="list-group-item"><i class="fas fa-check-circle text-success me-2"></i> Security software validation</li>
+                    </ul>
+                    
+                    {% if user.is_authenticated %}
+                    <div class="text-center mt-4">
+                        <a href="{% url 'dashboard' %}" class="btn btn-primary btn-lg px-4">
+                            <i class="fas fa-tachometer-alt me-2"></i>Go to Dashboard
+                        </a>
+                    </div>
+                    {% else %}
+                    <div class="text-center mt-4">
+                        <a href="{% url 'login' %}" class="btn btn-primary btn-lg px-4">
+                            <i class="fas fa-sign-in-alt me-2"></i>Login to Dashboard
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

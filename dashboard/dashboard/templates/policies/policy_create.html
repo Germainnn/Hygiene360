@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Policy - Hygiene360{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'policy_list' %}">Policies</a></li>
+            <li class="breadcrumb-item active">Create Policy</li>
+        </ol>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0"><i class="fas fa-plus-circle me-2"></i>Create New Policy</h1>
+    </div>
+
+    <div class="card card-dashboard">
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="mb-3">
+                    <label for="name" class="form-label">Policy Name</label>
+                    <input type="text" name="name" id="name" class="form-control" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea name="description" id="description" class="form-control" rows="3"></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label for="min_security_score" class="form-label">Minimum Security Score</label>
+                    <input type="number" name="min_security_score" id="min_security_score" class="form-control" step="0.1" value="70.0" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="max_missing_patches" class="form-label">Max Allowed Missing Patches</label>
+                    <input type="number" name="max_missing_patches" id="max_missing_patches" class="form-control" value="0">
+                </div>
+
+                <div class="mb-3">
+                    <label for="software_penalty_per_vuln" class="form-label">Software Penalty per Vulnerability</label>
+                    <input type="number" name="software_penalty_per_vuln" id="software_penalty_per_vuln" class="form-control" step="0.1" value="5.0">
+                </div>
+
+                <div class="mb-3">
+                    <label for="max_software_penalty" class="form-label">Max Software Penalty</label>
+                    <input type="number" name="max_software_penalty" id="max_software_penalty" class="form-control" step="0.1" value="20.0">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Required Features</label>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="require_os_up_to_date" id="require_os_up_to_date" checked>
+                        <label class="form-check-label" for="require_os_up_to_date">OS Up-to-date</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="require_antivirus" id="require_antivirus" checked>
+                        <label class="form-check-label" for="require_antivirus">Antivirus</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="require_firewall" id="require_firewall" checked>
+                        <label class="form-check-label" for="require_firewall">Firewall</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="require_edr" id="require_edr">
+                        <label class="form-check-label" for="require_edr">EDR</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="require_dlp" id="require_dlp">
+                        <label class="form-check-label" for="require_dlp">DLP</label>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save me-1"></i> Save Policy
+                </button>
+                <a href="{% url 'policy_list' %}" class="btn btn-secondary ms-2">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
