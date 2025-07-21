@@ -1,0 +1,22 @@
+# Ignore Python cache and environment files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.env
+
+# Ignore compiled executables
+*.exe
+
+# Ignore environment and config files
+.env
+*.log
+
+# Ignore OS-specific files
+.DS_Store
+Thumbs.db
+
+# Ignore build folders
+/dist/
+/build/
+/node_modules/
