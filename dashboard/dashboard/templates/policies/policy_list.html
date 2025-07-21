@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %}Hygiene360 - Policies{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item active">Policies</li>
+        </ol>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0"><i class="fas fa-clipboard-list me-2"></i>Policies</h1>
+        <a href="{% url 'policy_create' %}" class="btn btn-primary">
+            <i class="fas fa-plus me-1"></i>Create Policy
+        </a>
+    </div>
+    <form method="post" action="{% url 'policy_recheck' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-warning">
+            <i class="fas fa-sync-alt me-1"></i>Re-check Compliance for All Devices
+        </button>
+    </form>
+
+    <!-- Policy Table -->
+    <div class="card card-dashboard">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Name</th>
+                            <th>Description</th>
+                            <th>Min Score</th>
+                            <th>Tools Required</th>
+                            <th>Active</th>
+                            <th>Actions</th>  <!-- ✅ Add a new column -->
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for policy in policies %}
+                        <tr>
+                            <td>{{ policy.name }}</td>
+                            <td>{{ policy.description }}</td>
+                            <td>{{ policy.min_security_score }}</td>
+                            <td>
+                                <ul class="list-unstyled mb-0">
+                                    {% if policy.require_antivirus %}<li><i class="fas fa-shield-virus me-1"></i>AV</li>{% endif %}
+                                    {% if policy.require_firewall %}<li><i class="fas fa-fire-alt me-1"></i>Firewall</li>{% endif %}
+                                    {% if policy.require_edr %}<li><i class="fas fa-user-shield me-1"></i>EDR</li>{% endif %}
+                                    {% if policy.require_dlp %}<li><i class="fas fa-file-shield me-1"></i>DLP</li>{% endif %}
+                                </ul>
+                            </td>
+                            <td>
+                                {% if policy.is_active %}
+                                <span class="badge bg-success">Yes</span>
+                                {% else %}
+                                <span class="badge bg-secondary">No</span>
+                                <form method="post" action="{% url 'policy_activate' policy.id %}" style="display:inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-outline-primary">Activate</button>
+                                </form>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'policy_edit' policy.id %}" class="btn btn-sm btn-outline-secondary me-1">
+                                    Edit
+                                </a>
+                                {% if not policy.is_active %}
+                                <form method="post" action="{% url 'policy_delete' policy.id %}" style="display:inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-outline-danger"
+                                        onclick="return confirm('Are you sure you want to delete this policy?');">
+                                        Delete
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center text-muted">No policies found</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,4 @@
+requests>=2.31.0
+schedule>=1.2.0
+wmi>=1.5.1
+packaging>=23.2 

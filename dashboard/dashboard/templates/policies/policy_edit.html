@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block title %}Edit Policy - Hygiene360{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Edit Policy: {{ policy.name }}</h2>
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="mb-3">
+            <label>Name</label>
+            <input type="text" name="name" class="form-control" value="{{ policy.name }}" required>
+        </div>
+
+        <div class="mb-3">
+            <label>Description</label>
+            <textarea name="description" class="form-control">{{ policy.description }}</textarea>
+        </div>
+
+        <div class="mb-3">
+            <label>Minimum Security Score (%)</label>
+            <input type="number" step="0.1" name="min_security_score" class="form-control" value="{{ policy.min_security_score }}">
+        </div>
+
+        <h5>Requirements</h5>
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="require_os_up_to_date" {% if policy.require_os_up_to_date %}checked{% endif %}>
+            <label class="form-check-label">OS Up-to-Date</label>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="require_antivirus" {% if policy.require_antivirus %}checked{% endif %}>
+            <label class="form-check-label">Antivirus</label>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="require_firewall" {% if policy.require_firewall %}checked{% endif %}>
+            <label class="form-check-label">Firewall</label>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="require_edr" {% if policy.require_edr %}checked{% endif %}>
+            <label class="form-check-label">EDR</label>
+        </div>
+        <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" name="require_dlp" {% if policy.require_dlp %}checked{% endif %}>
+            <label class="form-check-label">DLP</label>
+        </div>
+
+        <div class="mb-3">
+            <label>Max Missing Patches</label>
+            <input type="number" name="max_missing_patches" class="form-control" value="{{ policy.max_missing_patches }}">
+        </div>
+
+        <div class="mb-3">
+            <label>Penalty per Vulnerable Software</label>
+            <input type="number" name="software_penalty_per_vuln" class="form-control" step="1" value="{{ policy.software_penalty_per_vuln }}">
+        </div>
+
+        <div class="mb-3">
+            <label>Max Software Penalty</label>
+            <input type="number" name="max_software_penalty" class="form-control" step="1" value="{{ policy.max_software_penalty }}">
+        </div>
+
+        <div class="mt-4">
+            <button type="submit" class="btn btn-primary">Update Policy</button>
+            <a href="{% url 'policy_list' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

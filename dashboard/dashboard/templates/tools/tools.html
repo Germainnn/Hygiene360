@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+
+{% block title %}Security Tools Overview{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <h1 class="h3 mb-4">Security Tools Overview</h1>
+
+  <!-- 🔎 Security Coverage Summary -->
+  <div class="card mb-4 mx-auto" style="max-width: 1050px;">
+    <div class="card-body">
+      <h5 class="mb-3">🔍 Security Coverage Summary</h5>
+      <div class="row text-center">
+        <div class="col-md-3">
+          <strong>Total Devices</strong>
+          <div class="badge bg-primary">{{ missing_summary.total_devices }}</div>
+        </div>
+        <div class="col-md-3">
+          <strong>Missing EDR</strong>
+          <div class="badge bg-danger">{{ missing_summary.missing_edr }}</div>
+        </div>
+        <div class="col-md-3">
+          <strong>Missing DLP</strong>
+          <div class="badge bg-danger">{{ missing_summary.missing_dlp }}</div>
+        </div>
+        <div class="col-md-3">
+          <strong>Missing Antivirus</strong>
+          <div class="badge bg-danger">{{ missing_summary.missing_av }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 📊 Bar Chart -->
+  <div class="card mb-4 mx-auto" style="max-width: 1050px;">
+    <div class="card-body">
+      <canvas id="missingToolsChart" height="100"></canvas>
+    </div>
+  </div>
+
+  <!-- 🔧 Per-Tool Breakdown -->
+  {% for tool_type, tools in tools_summary.items %}
+  <div class="card mb-4 mx-auto" style="max-width: 1050px;">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+      <h5 class="mb-0 text-capitalize">
+        {% if tool_type == 'edr' %}🔐{% elif tool_type == 'dlp' %}📤{% else %}🛡️{% endif %}
+        {{ tool_type|title }} Tools
+      </h5>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th class="w-50">Tool Name</th>
+              <th class="text-end" style="width: 180px;">Devices Installed</th>
+              <th class="text-end" style="width: 120px;">Running</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for tool in tools %}
+            <tr>
+              <td>{{ tool.name }}</td>
+              <td class="text-end align-middle">
+                <span class="badge bg-primary">{{ tool.installed }}</span>
+              </td>
+              <td class="text-end align-middle">
+                {% if tool.running > 0 %}
+                <span class="badge bg-success">{{ tool.running }}</span>
+                {% else %}
+                <span class="badge bg-danger">0</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="3" class="text-center text-muted">No tools found</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const ctx = document.getElementById("missingToolsChart").getContext("2d");
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['EDR', 'DLP', 'Antivirus'],
+      datasets: [{
+        label: 'Devices Missing',
+        data: [
+          {{ missing_summary.missing_edr }},
+          {{ missing_summary.missing_dlp }},
+          {{ missing_summary.missing_av }}
+        ],
+        backgroundColor: ['#dc3545', '#fd7e14', '#0d6efd']
+      }]
+    },
+    options: {
+      plugins: {
+        legend: { display: false }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          title: {
+            display: true,
+            text: 'Number of Devices'
+          }
+        }
+      }
+    }
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,346 @@
+{% extends 'base.html' %}
+
+{% block title %}Device Details - {{ device.hostname }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'device_list' %}">Devices</a></li>
+            <li class="breadcrumb-item active">{{ device.hostname }}</li>
+        </ol>
+    </nav>
+
+    <!-- Device Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">
+            <i class="fas fa-laptop me-2"></i>{{ device.hostname }}
+        </h1>
+        <div>
+            <span class="badge {% if device.is_compliant %}bg-success{% else %}bg-danger{% endif %} p-2">
+                {% if device.is_compliant %}Compliant{% else %}Non-Compliant{% endif %}
+            </span>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Device Info Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card card-dashboard h-100">
+                <div class="card-header bg-white">
+                    <h5 class="card-title mb-0">Device Information</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" class="mb-3">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <h6 class="text-muted mb-1">Username</h6>
+                            <input type="text" name="username" id="username" class="form-control form-control-sm"
+                                value="{{ device.username|default:'' }}"
+                                placeholder="Enter username"
+                                onkeydown="if(event.key === 'Enter'){ this.form.submit(); }">
+                        </div>
+                    </form>
+                    <div class="mb-3">
+                        <h6 class="text-muted mb-1">ID</h6>
+                        <p class="mb-0">{{ device.id }}</p>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="text-muted mb-1">Platform</h6>
+                        <p class="mb-0">{{ device.platform }} {{ device.platform_version }}</p>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="text-muted mb-1">Architecture</h6>
+                        <p class="mb-0">{{ device.architecture }}</p>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="text-muted mb-1">Processor</h6>
+                        <p class="mb-0">{{ device.processor }}</p>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="text-muted mb-1">Last Seen</h6>
+                        <p class="mb-0">{{ device.last_seen|date:"F j, Y, g:i a" }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Security Score Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card card-dashboard h-100">
+                <div class="card-header bg-white">
+                    <h5 class="card-title mb-0">Security Score</h5>
+                </div>
+                <div class="card-body text-center">
+                    <div class="security-score mb-3
+                        {% if device.security_score > 70 %}security-score-high
+                        {% elif device.security_score > 50 %}security-score-medium
+                        {% else %}security-score-low{% endif %}">
+                        {{ device.security_score|floatformat:1 }}
+                    </div>
+                    
+                    <div class="progress mb-4" style="height: 15px;">
+                        <div class="progress-bar 
+                            {% if device.security_score > 70 %}bg-success
+                            {% elif device.security_score > 50 %}bg-warning
+                            {% else %}bg-danger{% endif %}"
+                            role="progressbar" style="width: {{ device.security_score }}%"
+                            aria-valuenow="{{ device.security_score }}" aria-valuemin="0" aria-valuemax="100">
+                        </div>
+                    </div>
+
+                    {% if security_data.score_breakdown %}
+                    <div class="mt-4">
+                        <h6 class="text-muted mb-2">Score Breakdown</h6>
+                        <ul class="list-group list-group-flush">
+                            {% for entry in security_data.score_breakdown %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>{{ entry.component }}</span>
+                                <span>{{ entry.achieved|floatformat:1 }} / {{ entry.max|floatformat:1 }}</span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                {% if not device.is_compliant and security_data.details %}
+                    <div class="alert alert-warning text-start mt-4">
+                        <strong>Compliance Issues:</strong>
+                        <ul class="mb-0">
+                        {% for key, detail in security_data.details.items %}
+                            {% if not detail.compliant %}
+                                <li>{{ detail.reason }}</li>
+                            {% endif %}
+                        {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+                    
+                    <div class="row text-start">
+                        <div class="col-6 mb-2">
+                            <h6 class="text-muted mb-1">Antivirus</h6>
+                            <p class="mb-0">
+                                {% if device.antivirus_active %}
+                                <i class="fas fa-check-circle text-success"></i> Active
+                                {% else %}
+                                <i class="fas fa-times-circle text-danger"></i> Inactive
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-6 mb-2">
+                            <h6 class="text-muted mb-1">Firewall</h6>
+                            <p class="mb-0">
+                                {% if device.firewall_active %}
+                                <i class="fas fa-check-circle text-success"></i> Active
+                                {% else %}
+                                <i class="fas fa-times-circle text-danger"></i> Inactive
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-6 mb-2">
+                            <h6 class="text-muted mb-1">OS Updates</h6>
+                            <p class="mb-0">
+                                {% if device.os_up_to_date %}
+                                <i class="fas fa-check-circle text-success"></i> Up to date
+                                {% else %}
+                                <i class="fas fa-times-circle text-danger"></i> Updates needed
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alerts Card -->
+        <div class="col-xl-6 col-md-12 mb-4">
+            <div class="card card-dashboard h-100">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Active Alerts</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Severity</th>
+                                    <th>Title</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for alert in alerts %}
+                                {% if not alert.is_resolved %}
+                                <tr>
+                                    <td>
+                                        {% if alert.severity == 3 %}
+                                        <span class="badge bg-danger">Critical</span>
+                                        {% elif alert.severity == 2 %}
+                                        <span class="badge bg-warning">High</span>
+                                        {% elif alert.severity == 1 %}
+                                        <span class="badge bg-info">Medium</span>
+                                        {% else %}
+                                        <span class="badge bg-secondary">Low</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ alert.title }}</td>
+                                    <td>
+                                    {{ alert.first_seen|date:"M d, Y" }}
+                                    <br>
+                                        <small class="text-muted">
+                                        {{ alert.duration_display }}
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <form method="post" action="{% url 'resolve_alert' alert.id %}" class="d-inline">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-sm btn-outline-success">
+                                                <i class="fas fa-check me-1"></i>Resolve
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endif %}
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center">No active alerts</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Software Inventory -->
+    <div class="row">
+        <div class="col-12 mb-4">
+            <div class="card card-dashboard">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Software Inventory</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Version</th>
+                                    <th>Publisher</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for sw in software %}
+                                <tr>
+                                    <td>{{ sw.name }}</td>
+                                    <td>{{ sw.version }}</td>
+                                    <td>{{ sw.publisher }}</td>
+                                    <td>
+                                        {% if sw.is_vulnerable %}
+                                            <span class="badge bg-danger">Vulnerable</span>
+                                        {% elif sw.is_outdated %}
+                                            <span class="badge bg-warning">Outdated</span>
+                                        {% elif sw.is_vulnerable == None %}
+                                            <span class="badge bg-secondary">Unknown</span>
+                                        {% else %}
+                                            <span class="badge bg-success">Up to date</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center">No software found</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<h4 class="mt-5">Security Score Trend</h4>
+<canvas id="scoreChart" height="100"></canvas>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const chartLabels = {{ chart_data.labels|safe }};
+    const chartScores = {{ chart_data.scores|safe }};
+    const edrFlags = JSON.parse('{{ chart_data.edr_flags|escapejs }}');
+    const dlpFlags = JSON.parse('{{ chart_data.dlp_flags|escapejs }}');
+
+    const ctx = document.getElementById('scoreChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: chartLabels,
+            datasets: [{
+                label: 'Security Score',
+                data: chartScores,
+                fill: false,
+                borderColor: 'rgba(75, 192, 192, 1)',
+                tension: 0.3,
+                pointRadius: 5,
+                pointHoverRadius: 8,
+                pointBackgroundColor: chartScores.map(score => {
+                    if (score >= 80) return 'green';
+                    if (score >= 50) return 'orange';
+                    return 'red';
+                })
+            }]
+        },
+        options: {
+            responsive: true,
+            interaction: {
+                mode: 'index',
+                intersect: false
+            },
+            layout: {
+                padding: {
+                    top: 20
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    title: {
+                        display: true,
+                        text: 'Score'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Date'
+                    }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    enabled: true,
+                    callbacks: {
+                        label: function (context) {
+                            return `Score: ${context.formattedValue}`;
+                        },
+                        afterLabel: function (context) {
+                            const i = context.dataIndex;
+                            return [
+                                edrFlags[i] ? "EDR: ✓" : "EDR: ✗",
+                                dlpFlags[i] ? "DLP: ✓" : "DLP: ✗"
+                            ];
+                        }
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %} 

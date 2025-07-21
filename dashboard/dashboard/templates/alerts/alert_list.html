@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+
+{% block title %}Hygiene360 - Alerts{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item active">Alerts</li>
+        </ol>
+    </nav>
+
+    <!-- Alerts Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">
+            <i class="fas fa-exclamation-triangle me-2"></i>Alerts
+        </h1>
+    </div>
+
+    <!-- Alerts by Device -->
+    <div class="accordion" id="alertsAccordion">
+        {% for hostname, device_alerts in grouped_alerts %}
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="heading-{{ forloop.counter }}">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ forloop.counter }}">
+                    Device: <strong class="ms-2">{{ hostname }}</strong> ({{ device_alerts|length }} alert{{ device_alerts|length|pluralize }})
+                </button>
+            </h2>
+            <div id="collapse-{{ forloop.counter }}" class="accordion-collapse collapse" data-bs-parent="#alertsAccordion">
+                <div class="accordion-body">
+                    <table class="table table-sm table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Severity</th>
+                                <th>Title</th>
+                                <th>Description</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for alert in device_alerts %}
+                            <tr>
+                                <td>
+                                    {% if alert.severity == 3 %}
+                                    <span class="badge bg-danger">Critical</span>
+                                    {% elif alert.severity == 2 %}
+                                    <span class="badge bg-warning">High</span>
+                                    {% elif alert.severity == 1 %}
+                                    <span class="badge bg-info">Medium</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">Low</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ alert.title }}</td>
+                                <td>{{ alert.description|default:"—" }}</td>
+                                <td>
+                                    {{ alert.first_seen|date:"M d, Y" }}<br>
+                                    <small class="text-muted alert-duration"
+                                        data-first-seen="{{ alert.first_seen|date:'c' }}"
+                                        data-resolved="{{ alert.is_resolved }}"
+                                        data-resolved-at="{{ alert.resolved_at|date:'c' }}">
+                                        {{ alert.duration_display }}
+                                    </small>
+                                </td>
+                                <td>
+                                    <span class="badge bg-danger">Active</span>
+                                </td>
+                                <td>
+                                    <form method="post" action="{% url 'resolve_alert' alert.id %}">
+                                        {% csrf_token %}
+                                        <button class="btn btn-sm btn-outline-success" type="submit">
+                                            <i class="fas fa-check me-1"></i>Resolve
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            <script>
+                            function formatDuration(minutes) {
+                                const days = Math.floor(minutes / 1440);
+                                const hours = Math.floor((minutes % 1440) / 60);
+                                const mins = minutes % 60;
+                                const parts = [];
+                                if (days) parts.push(`${days}d`);
+                                if (hours) parts.push(`${hours}h`);
+                                if (mins || parts.length === 0) parts.push(`${mins}m`);
+                                return "Lasted for " + parts.join(" ");
+                            }
+
+                            function updateDurations() {
+                                const now = new Date();
+
+                                document.querySelectorAll('.alert-duration').forEach(el => {
+                                    const firstSeen = new Date(el.dataset.firstSeen);
+                                    const isResolved = el.dataset.resolved === "True";
+                                    const resolvedAt = el.dataset.resolvedAt ? new Date(el.dataset.resolvedAt) : null;
+
+                                    let delta = isResolved && resolvedAt
+                                        ? resolvedAt - firstSeen
+                                        : now - firstSeen;
+
+                                    const minutes = Math.floor(delta / 60000);
+                                    el.textContent = formatDuration(minutes);
+                                });
+                            }
+
+                            // Update durations once on load
+                            updateDurations();
+                            // Optionally update every 60 seconds
+                            setInterval(updateDurations, 60000);
+                            </script>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="text-center text-muted mt-4">No alerts to show</div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
