@@ -2,6 +2,10 @@
 
 Hygiene360 is a lightweight, automated endpoint security agent system designed to assess and quantify security posture in remote environments. It evaluates key security indicators, provides dynamic scoring, and visualizes results through a centralized web dashboard.
 
+<img width="1898" height="865" alt="image" src="https://github.com/user-attachments/assets/9f91a607-428f-41b0-90eb-2266b4273e25" />
+<img width="1005" height="641" alt="image" src="https://github.com/user-attachments/assets/de38ef4f-626c-426b-bef1-32ae1d17b617" />
+
+
 ## System Architecture
 
 The system consists of three main components:
